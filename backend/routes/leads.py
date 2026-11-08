@@ -79,8 +79,11 @@ def update_lead_status(
 
     allowed_statuses = ["contacted", "qualified", "site_visit", "converted", "lost"]
 
-    if new_status not in allowed_statuses:
-        raise HTTPException(status_code=400, detail="Invalid lead status")
+    if new_status == "contacted" and not lead.contact_consent:
+      raise HTTPException(
+        status_code=403,
+        detail="Buyer has not given contact consent"
+      )
 
     lead.status = new_status
     db.commit()

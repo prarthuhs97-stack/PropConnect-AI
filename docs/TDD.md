@@ -361,3 +361,12 @@ PropConnect AI combines real estate lead management, approved-information-based 
 The system uses a React frontend, FastAPI backend, PostgreSQL database, and Groq language-model integration.
 
 The design emphasizes structured data management, controlled AI responses, authentication, and a practical workflow for buyers, salespeople, and administrators.
+**## Project Repository**
+
+GitHub: https://github.com/prarthuhs97-stack/PropConnect-AI
+
+**Live Application:** https://propconnect-ai-1.onrender.com
+
+**Backend API:** https://propconnect-ai-c5mz.onrender.com
+
+**API Documentation:** https://propconnect-ai-c5mz.onrender.com/docs

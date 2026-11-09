@@ -4,3 +4,15 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .vscode/
+
+# Frontend
+node_modules/
+dist/
+
+# Environment files
+.env.*
+!.env.example
+
+# Build and cache files
+.DS_Store
+*.backup

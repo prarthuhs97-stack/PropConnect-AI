@@ -5,10 +5,24 @@ from database import get_db
 from models.lead import Lead
 from models.project import Project
 from models.user import User
-from schemas.lead import LeadCreate, LeadResponse
+from schemas.lead import LeadCreate, LeadResponse, LeadHandoff
 from security import get_current_user, require_role
 
 router = APIRouter(prefix="/leads", tags=["Leads"])
+
+def check_duplicate_lead(db, buyer_id, project_id, bhk):
+    existing_lead = db.query(Lead).filter(
+        Lead.buyer_id == buyer_id,
+        Lead.project_id == project_id,
+        Lead.bhk == bhk,
+        Lead.status.in_(["new", "contacted", "qualified", "site_visit"])
+    ).first()
+
+    if existing_lead:
+        raise HTTPException(
+            status_code=409,
+            detail="An active lead already exists for this project and BHK"
+        )
 
 
 @router.post("/", response_model=LeadResponse)
@@ -31,11 +45,17 @@ def create_lead(
                 status_code=400,
                 detail="Minimum budget cannot exceed maximum budget"
             )
+    check_duplicate_lead(
+    db, current_user.id, lead.project_id, lead.bhk
+)
 
     new_lead = Lead(
         **lead.model_dump(),
         buyer_id=current_user.id
     )
+    check_duplicate_lead(
+    db, current_user.id, lead.project_id, lead.bhk
+)
 
     db.add(new_lead)
     db.commit()
@@ -117,3 +137,46 @@ def assign_lead(
     db.commit()
 
     return {"message": "Lead assigned successfully"}
+
+@router.post("/handoff", response_model=LeadResponse)
+def create_handoff(
+    lead: LeadHandoff,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(["buyer"]))
+):
+    # Handoff requires explicit buyer consent
+    if not lead.contact_consent:
+        raise HTTPException(
+            status_code=403,
+            detail="Buyer consent is required for sales handoff"
+        )
+
+    project = db.query(Project).filter(
+        Project.id == lead.project_id,
+        Project.is_active == True
+    ).first()
+
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    if (
+        lead.budget_min is not None
+        and lead.budget_max is not None
+        and lead.budget_min > lead.budget_max
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Minimum budget cannot exceed maximum budget"
+        )
+
+    new_lead = Lead(
+        **lead.model_dump(exclude={"conversation_summary"}),
+        buyer_id=current_user.id,
+        conversation_summary=lead.conversation_summary
+    )
+
+    db.add(new_lead)
+    db.commit()
+    db.refresh(new_lead)
+
+    return new_lead

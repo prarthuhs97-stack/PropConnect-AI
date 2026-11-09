@@ -8,10 +8,18 @@ from routes.leads import router as leads_router
 from routes.visits import router as visits_router
 from database import Base, engine
 import models
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(
     title="PropConnect AI",
     description="AI-powered real estate lead management platform",
     version="1.0.0"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 Base.metadata.create_all(bind=engine)
 app.include_router(auth_router)

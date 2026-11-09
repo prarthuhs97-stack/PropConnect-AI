@@ -172,3 +172,9 @@ npm run build
 **Prarthana H S**
 
 GitHub: [@prarthuhs97-stack](https://github.com/prarthuhs97-stack)
+
+## Live Demo
+
+- **Frontend:** https://propconnect-ai-1.onrender.com
+- **Backend API:** https://propconnect-ai-c5mz.onrender.com
+- **API Documentation (Swagger):** https://propconnect-ai-c5mz.onrender.com/docs
